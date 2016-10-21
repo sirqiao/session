@@ -356,6 +356,7 @@ function session(options) {
 
     // generate the session
     function generate(cookieOpt) {
+      console.log(cookieOpt, '========== session_debug ==========');
       store.generate(req, cookieOpt);
       originalId = req.sessionID;
       originalHash = hash(req.session);
