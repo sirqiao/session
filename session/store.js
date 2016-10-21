@@ -49,8 +49,9 @@ util.inherits(Store, EventEmitter)
 
 Store.prototype.regenerate = function(req, fn){
   var self = this;
+  var cookie = req.session.cookie;
   this.destroy(req.sessionID, function(err){
-    self.generate(req);
+    self.generate(req, cookie);
     fn(err);
   });
 };

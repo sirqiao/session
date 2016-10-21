@@ -154,12 +154,12 @@ function session(options) {
   }
 
   // generates the new session
-  store.generate = function(req){
+  store.generate = function(req, cookieOpt){
     req.sessionID = generateId(req);
     req.session = new Session(req);
-    req.session.cookie = new Cookie(cookieOptions);
+    req.session.cookie = new Cookie(cookieOpt);
 
-    if (cookieOptions.secure === 'auto') {
+    if (cookieOpt.secure === 'auto') {
       req.session.cookie.secure = issecure(req, trustProxy);
     }
   };
@@ -355,8 +355,8 @@ function session(options) {
     };
 
     // generate the session
-    function generate() {
-      store.generate(req);
+    function generate(cookieOpt) {
+      store.generate(req, cookieOpt);
       originalId = req.sessionID;
       originalHash = hash(req.session);
       wrapmethods(req.session);
@@ -434,7 +434,7 @@ function session(options) {
     // generate a session if the browser doesn't send a sessionID
     if (!req.sessionID) {
       debug('no SID sent, generating session');
-      generate();
+      generate(cookieOptions);
       next();
       return;
     }
@@ -451,11 +451,11 @@ function session(options) {
           return;
         }
 
-        generate();
+        generate(cookieOptions);
       // no session
       } else if (!sess) {
         debug('no session found');
-        generate();
+        generate(cookieOptions);
       // populate req.session
       } else {
         debug('session found');
