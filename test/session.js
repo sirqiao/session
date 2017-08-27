@@ -2097,6 +2097,33 @@ describe('session()', function(){
       })
     })
   })
+
+  describe('multiple session', function() {
+    it.only('different cookie and name for different request', function(done) {
+      var app = express()
+                .use(cookieParser())
+                .use(getSession)
+                .use(function (req, res, next) {
+                  res.end();
+                });
+
+      request(app)
+        .get('/test/a')
+        .expect(200, null, function(err, res) {
+          var cookieA = cookie(res);
+          assert.equal(/^a/.test(cookieA), true);
+          assert.equal(/Domain=a\.test\.com/.test(cookieA), true);
+          request(app)
+            .get('/test/b')
+            .expect(200, null, function(err, res) {
+              var cookieB = cookie(res);
+              assert.equal(/^b/.test(cookieB), true)
+              assert.equal(/Domain=b\.test\.com/.test(cookieB), true)
+              done()
+            })
+        })
+    })
+  })
 })
 
 function cookie(res) {
@@ -2314,6 +2341,26 @@ function writePatch (res) {
 
     return _write.apply(this, arguments)
   }
+}
+
+function getSession (req, res, next) {
+  var getSess = session({
+    store: new session.MemoryStore(),
+    secret: 'asdfgh'
+  });
+  var sess;
+  if (req.originalUrl === '/test/a') {
+    sess = getSess('a', {
+      domain: 'a.test.com',
+      maxAge: 384000
+    })
+  } else {
+    sess = getSess('b', {
+      domain: 'b.test.com',
+      maxAge: 384000
+    })
+  }
+  return sess(req, res, next);
 }
 
 function SyncStore () {
