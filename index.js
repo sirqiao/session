@@ -87,13 +87,13 @@ function session(options) {
   var opts = options || {}
 
   // get the cookie options
-  var cookieOptions = opts.cookie || {}
+  var defaultCookieOptions = opts.cookie || {}
 
   // get the session id generate function
   var generateId = opts.genid || generateSessionId
 
   // get the session cookie name
-  var name = opts.name || opts.key || 'connect.sid'
+  var defaultName = opts.name || opts.key || 'connect.sid'
 
   // get the session store
   var store = opts.store || new MemoryStore()
@@ -176,14 +176,17 @@ function session(options) {
   })
 
   return function getSession() {
+    var name, cookieOptions;
     if (arguments.length == 2) {
       name = arguments[0];
       cookieOptions = arguments[1];
       return session;
     } else {
+      name = defaultName;
+      cookieOptions = defaultCookieOptions;
       var req = arguments[0];
-      var res = arguments[1]; 
-      var next = arguments[2]; 
+      var res = arguments[1];
+      var next = arguments[2];
       return session(req, res, next);
     }
     function session(req, res, next) {
